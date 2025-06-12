@@ -1,5 +1,4 @@
 import { Server, Socket } from "socket.io";
-import { StartMatch } from "../../../usecases/match/StartMatch.ts";
 import { MatchRepository } from "../../../infrastructure/repositories/MatchRepository.ts";
 import { UpdatePosition } from "../../../usecases/match/UpdatePosition.ts";
 

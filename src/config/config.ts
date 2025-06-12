@@ -11,6 +11,11 @@ export const SERVER_PORT = process.env.SERVER_PORT? Number(process.env.SERVER_PO
 
 export const DATABASE_URL = process.env.DATABASE_URL ?? "";
 
+export const CLIENT_URL = process.env.CLIENT_URL ?? "http://localhost:5173"
+
+export const ACCESS_SECRET = process.env.ACCESS_SECRET || "";
+export const REFRESH_SECRET = process.env.REFRESH_SECRET || "";
+
 
 export const SERVER = {
     SERVER_HOSTNAME,

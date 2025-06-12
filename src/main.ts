@@ -1,4 +1,4 @@
-import { DATABASE_URL, SERVER } from "./config/config.ts";
+import { CLIENT_URL, DATABASE_URL, SERVER } from "./config/config.ts";
 import express from "express";
 import connectDb from "./infrastructure/db/db.ts";
 import { createServer } from "http";
@@ -7,21 +7,30 @@ import cors from "cors";
 import { updatePositionHandler } from "./infrastructure/socket/handlers/matchSocketHandlers.ts";
 
 import matchRouter from "./infrastructure/routes/matchRoutes.ts";
+import userRouter from "./infrastructure/routes/userRoutes.ts";
+import authRouter from "./infrastructure/routes/authRoutes.ts";
 
 const app = express();
 const httpServer = createServer(app);
 
 
 const io = new Server(httpServer, {
-  cors: {origin: "*"}
+  cors: {origin: CLIENT_URL, credentials: true}
 })
 
 
 async function main() {
 
-  app.use(cors({origin: "*"}));
-  app.use("/api/match", matchRouter);
+  //middlewares
+  app.use(express.json());
+  app.use(cors({origin: CLIENT_URL, credentials: true}));
 
+  //routes
+  app.use("/api/match", matchRouter);
+  app.use("/api/user", userRouter);
+  app.use("/api/auth", authRouter);
+
+  //sockets
   io.on("connection", (socket) => {
     updatePositionHandler(socket);
   })

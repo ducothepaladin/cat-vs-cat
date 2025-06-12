@@ -15,7 +15,7 @@ export class StartMatch {
         const payload = {
             slot: [{playerId: p1}, {playerId: p2}],
             catStatus: [catStatus1, catStatus2],
-            status: "start",
+            status: "pending",
         }
 
         const matchId = await this.repo.createRoom(payload);

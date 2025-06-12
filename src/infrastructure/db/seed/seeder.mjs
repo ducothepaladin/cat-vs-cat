@@ -15,8 +15,9 @@ async function main() {
     await mongoose.connect(process.env.DATABASE_URL);
 
     const users = [
-        { email: 'alice@example.com', name: 'Alice', password: 'password123' },
-        { email: 'bob@example.com', name: 'Bob', password: 'password123' },
+        { email: 'carol@example.com', name: 'Carol', password: 'password123' },
+        { email: 'dave@example.com', name: 'Dave', password: 'password123' },
+        { email: 'eve@example.com', name: 'Eve', password: 'password123' },
     ];
 
     for (const user of users) {

@@ -4,7 +4,8 @@ import { MatchRepository } from '../../infrastructure/repositories/MatchReposito
 import { StartMatch } from '../../usecases/match/StartMatch';
 
 export const createMatch = async (req: Request, res: Response) => {
-    const { p1, p2 } = req.body as { p1: string; p2: string };
+    const { p1, p2 } = req.body;
+
     try {
         const usecase = new StartMatch(new MatchRepository());
         const result = await usecase.execute({p1, p2});
