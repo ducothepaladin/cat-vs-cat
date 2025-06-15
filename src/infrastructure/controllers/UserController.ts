@@ -5,7 +5,7 @@ import { FindUserById } from "../../usecases/user/FindUserById";
 import { AddFriend } from "../../usecases/user/AddFriend";
 
 export const getFriends = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { _id: id } = req.user;
   try {
     const usecase = new GetFriends(new UserRepository());
     const result = await usecase.execute({ id });
@@ -23,7 +23,7 @@ export const getFriends = async (req: Request, res: Response) => {
 };
 
 export const findUserById = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { _id: id } = req.user;
   try {
     const usecase = new FindUserById(new UserRepository());
     const result = await usecase.execute({ id });
@@ -41,11 +41,11 @@ export const findUserById = async (req: Request, res: Response) => {
 };
 
 export const addFriend = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { friendId } = req.body;
+  const { _id: id } = req.user;
+  const { email } = req.body;
   try {
     const usecase = new AddFriend(new UserRepository());
-    await usecase.execute({ userId: id, friendId });
+    await usecase.execute({ userId: id, friendEmail: email });
 
     res.status(200).json({
       message: "Friend Added",

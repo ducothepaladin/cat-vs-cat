@@ -4,18 +4,22 @@ import connectDb from "./infrastructure/db/db.ts";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import { updatePositionHandler } from "./infrastructure/socket/handlers/matchSocketHandlers.ts";
+import cookieParser from "cookie-parser";
+
+import { bothReadyHandler, kickHandler, leaveHandler, updatePositionHandler } from "./infrastructure/socket/handlers/matchSocketHandlers.ts";
+import { alreadyInRoomHandler, inviteHandler, joinSlotHandler } from "./infrastructure/socket/handlers/userSocketHandlers.ts";
 
 import matchRouter from "./infrastructure/routes/matchRoutes.ts";
 import userRouter from "./infrastructure/routes/userRoutes.ts";
 import authRouter from "./infrastructure/routes/authRoutes.ts";
+import { socketAuth } from "./infrastructure/middlewares/socketAuth.ts";
 
 const app = express();
 const httpServer = createServer(app);
 
 
 const io = new Server(httpServer, {
-  cors: {origin: CLIENT_URL, credentials: true}
+  cors: {origin: CLIENT_URL, credentials: true, methods: ['GET', 'POST']}
 })
 
 
@@ -23,7 +27,9 @@ async function main() {
 
   //middlewares
   app.use(express.json());
+  app.use(cookieParser());
   app.use(cors({origin: CLIENT_URL, credentials: true}));
+  io.use(socketAuth)
 
   //routes
   app.use("/api/match", matchRouter);
@@ -32,6 +38,18 @@ async function main() {
 
   //sockets
   io.on("connection", (socket) => {
+  
+    socket.on('join', ({roomId}) => {
+      socket.join(roomId?? socket.data.userId);
+    });
+
+
+    inviteHandler(io, socket);
+    alreadyInRoomHandler(io, socket);
+    joinSlotHandler(io, socket);
+    bothReadyHandler(io, socket);
+    kickHandler(io, socket);
+    leaveHandler(io, socket);
     updatePositionHandler(socket);
   })
 

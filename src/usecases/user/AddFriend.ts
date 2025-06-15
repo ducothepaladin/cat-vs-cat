@@ -3,8 +3,8 @@ import { IUserRepository } from "../../domain/repositories/IUserRepository";
 export class AddFriend {
     constructor(private readonly repo: IUserRepository) {}
 
-    async execute(input: {userId: string, friendId: string}) {
-        const { userId, friendId } = input;
-        await this.repo.addNewFriend(userId, friendId);
+    async execute(input: {userId: string, friendEmail: string}) {
+        const { userId, friendEmail } = input;
+        await this.repo.addNewFriend(userId, friendEmail);
     }
 }
