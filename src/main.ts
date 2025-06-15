@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import { bothReadyHandler, kickHandler, leaveHandler, updatePositionHandler } from "./infrastructure/socket/handlers/matchSocketHandlers.ts";
+import { bothReadyHandler, kickHandler, leaveHandler, startMatchHandler, updatePositionHandler } from "./infrastructure/socket/handlers/matchSocketHandlers.ts";
 import { alreadyInRoomHandler, inviteHandler, joinSlotHandler } from "./infrastructure/socket/handlers/userSocketHandlers.ts";
 
 import matchRouter from "./infrastructure/routes/matchRoutes.ts";
@@ -50,6 +50,8 @@ async function main() {
     bothReadyHandler(io, socket);
     kickHandler(io, socket);
     leaveHandler(io, socket);
+
+    startMatchHandler(io, socket);
     updatePositionHandler(socket);
   })
 

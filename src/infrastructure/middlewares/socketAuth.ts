@@ -3,6 +3,7 @@ import { Socket } from "socket.io";
 
 
 export const onlineUsers = new Map<string, string>();
+// export const playerStates = new Map<
 
 export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
     const token = socket.handshake.auth?.token;
