@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { UserRepository } from "../../infrastructure/repositories/UserRepository";
 import { RegisterUser } from "../../usecases/user/RegisterUser";
 import { LoginUser } from "../../usecases/user/LoginUser";
+import { Refresh } from "../../usecases/user/Refresh";
 
 export const register = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
@@ -38,6 +39,32 @@ export const login = async (req: Request, res: Response) => {
       message: "Login success",
       content: {
         accessToken,
+      },
+    });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: errorMessage });
+  }
+};
+
+export const refresh = async (req: Request, res: Response) => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) {
+    res
+      .status(401)
+      .json({ error: "Refresh token not found, please login again" });
+  }
+
+  try {
+    const usecase = new Refresh(new UserRepository());
+
+    const result = await usecase.execute({ refreshToken });
+
+    res.status(200).json({
+      message: "Refresh success",
+      content: {
+        accessToken: result.tokens.accessToken,
       },
     });
   } catch (err) {

@@ -1,7 +1,7 @@
 import Users from "../../infrastructure/db/models/User";
 import { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { User } from "../../domain/entities/User";
-import { generateToken } from "../../lib/util/token";
+import { generateToken, verifyRefreshToken } from "../../lib/util/token";
 
 export class UserRepository implements IUserRepository {
   async getUser(id: string): Promise<User | null> {
@@ -35,6 +35,7 @@ export class UserRepository implements IUserRepository {
     if (!user) return null;
 
     return user.friends.map((fr: any) => ({
+      id: fr.userId?._id,
       name: fr.userId?.name,
       email: fr.userId?.email,
     }));
@@ -50,17 +51,18 @@ export class UserRepository implements IUserRepository {
     return user;
   }
 
-  async addNewFriend(userId: string, friendId: string): Promise<void> {
-    if (userId == friendId) throw new Error("Cannot add yourself as a friend");
+  async addNewFriend(userId: string, friendEmail: string): Promise<void> {
 
     const user = await Users.findById(userId);
-    const friend = await Users.findById(friendId);
+    const friend = await Users.findOne({email: friendEmail});
 
     if (!user || !friend) throw new Error("Not found");
 
+    if(user == friend) throw new Error("Cannot add yourself as a friend");
+
     await Users.findByIdAndUpdate(userId, {
       $addToSet: {
-        friends: { userId: friendId },
+        friends: { userId: friend._id },
       },
     });
   }
@@ -70,7 +72,7 @@ export class UserRepository implements IUserRepository {
     email: string,
     password: string
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const exist = await this.getUserByEmail(email);
+    const exist = await Users.findOne({email});
     if (exist) throw new Error("Email is already in used.");
 
     const user = new Users({ name, email, password });
@@ -98,5 +100,27 @@ export class UserRepository implements IUserRepository {
     const token = generateToken(user._id.toString());
 
     return { ...token };
+  }
+
+  async refresh(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+
+    if(!refreshToken) throw new Error('Refresh token need..');
+
+    let userId;
+      try {
+        const decoded = verifyRefreshToken(refreshToken);
+        userId = (decoded as any)._id;
+      } catch (err) {
+        throw new Error("Invalid or expired refresh token");
+      }
+
+      const user = await this.getUserById(userId);
+        if (!user) {
+          throw new Error("User not found");
+        }
+      
+        const newToken = generateToken(user.id);
+        return { ...newToken };
+
   }
 }
