@@ -3,6 +3,7 @@ import { Socket } from "socket.io";
 
 
 export const onlineUsers = new Map<string, string>();
+// export const playerStates = new Map<
 
 export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
     const token = socket.handshake.auth?.token;
@@ -12,6 +13,7 @@ export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
     try {
         const decoded = verifyAccessToken(token);
         socket.data.userId = (decoded as any)._id;
+        socket.data.lastSent = 0;
         onlineUsers.set((decoded as any)._id, socket.id)
         next();
     } catch {
