@@ -1,14 +1,14 @@
 import { Match as M } from "../../domain/entities/Match.ts";
 import Match from "../../infrastructure/db/models/Match.ts";
-import { CatStatus } from "../../domain/valueObjects/CatStatus.ts";
 import { IMatchRepository } from "../../domain/repositories/IMatchRepository.ts";
 import { MatchPayload } from "../../infrastructure/type/Match.ts";
 
 export class MatchRepository implements IMatchRepository {
+
+
   async createRoom(match: MatchPayload): Promise<M | null> {
     const matchDoc = await Match.create({
       slot: [match.slot[0], match.slot[1]],
-      catStatus: [match.catStatus[0], match.catStatus[1]],
       match_status: match.status,
     });
 
@@ -18,9 +18,6 @@ export class MatchRepository implements IMatchRepository {
       playerId: s?.playerId ? s.playerId.toString() : "",
     }));
 
-    const catStatus = matchDoc.catStatus.map(
-      (cs: any) => new CatStatus(cs.hp, cs.def, cs.critrate, cs.position)
-    );
     const status = matchDoc.match_status;
     const startTime = matchDoc.createdAt;
     const endTime = matchDoc.endTime;
@@ -29,7 +26,6 @@ export class MatchRepository implements IMatchRepository {
       matchDoc._id.toString(),
       slot,
       status,
-      catStatus,
       startTime,
       endTime
     );
@@ -46,14 +42,11 @@ export class MatchRepository implements IMatchRepository {
       playerId: s?.playerId ? s.playerId.toString() : "",
     }));
 
-    const catStatus = matchDoc.catStatus.map(
-      (cs: any) => new CatStatus(cs.hp, cs.def, cs.critrate, cs.position)
-    );
     const status = matchDoc.match_status;
     const startTime = matchDoc.createdAt;
     const endTime = matchDoc.endTime;
 
-    const match = new M(id, slot, status, catStatus, startTime, endTime);
+    const match = new M(id, slot, status, startTime, endTime);
 
     return match;
   }

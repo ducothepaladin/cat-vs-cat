@@ -13,6 +13,7 @@ export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
     try {
         const decoded = verifyAccessToken(token);
         socket.data.userId = (decoded as any)._id;
+        socket.data.lastSent = 0;
         onlineUsers.set((decoded as any)._id, socket.id)
         next();
     } catch {

@@ -6,30 +6,42 @@ import { Server } from "socket.io";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import { bothReadyHandler, kickHandler, leaveHandler, startMatchHandler, updatePositionHandler } from "./infrastructure/socket/handlers/matchSocketHandlers.ts";
-import { alreadyInRoomHandler, inviteHandler, joinSlotHandler } from "./infrastructure/socket/handlers/userSocketHandlers.ts";
+import {
+  bothReadyHandler,
+  hitHandler,
+  kickHandler,
+  leaveHandler,
+  playerActionHandler,
+  playerPositionUpdate,
+  startMatchHandler,
+} from "./infrastructure/socket/handlers/matchSocketHandlers.ts";
+import {
+  alreadyInRoomHandler,
+  inviteHandler,
+  joinSlotHandler,
+} from "./infrastructure/socket/handlers/userSocketHandlers.ts";
 
 import matchRouter from "./infrastructure/routes/matchRoutes.ts";
 import userRouter from "./infrastructure/routes/userRoutes.ts";
 import authRouter from "./infrastructure/routes/authRoutes.ts";
-import { socketAuth } from "./infrastructure/middlewares/socketAuth.ts";
+import {
+  onlineUsers,
+  socketAuth,
+} from "./infrastructure/middlewares/socketAuth.ts";
 
 const app = express();
 const httpServer = createServer(app);
 
-
 const io = new Server(httpServer, {
-  cors: {origin: CLIENT_URL, credentials: true, methods: ['GET', 'POST']}
-})
-
+  cors: { origin: CLIENT_URL, credentials: true, methods: ["GET", "POST"] },
+});
 
 async function main() {
-
   //middlewares
   app.use(express.json());
   app.use(cookieParser());
-  app.use(cors({origin: CLIENT_URL, credentials: true}));
-  io.use(socketAuth)
+  app.use(cors({ origin: CLIENT_URL, credentials: true }));
+  io.use(socketAuth);
 
   //routes
   app.use("/api/match", matchRouter);
@@ -38,11 +50,13 @@ async function main() {
 
   //sockets
   io.on("connection", (socket) => {
-  
-    socket.on('join', ({roomId}) => {
-      socket.join(roomId?? socket.data.userId);
+    socket.on("join", ({ roomId }) => {
+      socket.join(roomId ?? socket.data.userId);
     });
 
+    socket.on("disconnect", () => {
+      onlineUsers.delete(socket.data.userId);
+    });
 
     inviteHandler(io, socket);
     alreadyInRoomHandler(io, socket);
@@ -52,8 +66,10 @@ async function main() {
     leaveHandler(io, socket);
 
     startMatchHandler(io, socket);
-    updatePositionHandler(socket);
-  })
+    playerActionHandler(io, socket);
+    playerPositionUpdate(io, socket);
+    hitHandler(io, socket);
+  });
 
   connectDb(DATABASE_URL).then(() => {
     httpServer.listen(SERVER.SERVER_PORT, () => {
