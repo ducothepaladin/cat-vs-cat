@@ -1,20 +1,26 @@
 import { Server, Socket } from "socket.io";
-import { MatchRepository } from "../../../infrastructure/repositories/MatchRepository.ts";
-import { onlineUsers } from "../../../infrastructure/middlewares/socketAuth.ts";
-import { FindUserById } from "../../../usecases/user/FindUserById.ts";
-import { UserRepository } from "../../../infrastructure/repositories/UserRepository.ts";
-import { StartMatch } from "../../../usecases/match/StartMatch.ts";
-import { PlayerData, PlayerInput } from "../../../infrastructure/type/Match.ts";
+import { MatchRepository } from "../../../infrastructure/repositories/MatchRepository";
+import { onlineUsers } from "../../../infrastructure/middlewares/socketAuth";
+import { FindUserById } from "../../../usecases/user/FindUserById";
+import { UserRepository } from "../../../infrastructure/repositories/UserRepository";
+import { StartMatch } from "../../../usecases/match/StartMatch";
+import { PlayerInput } from "../../../infrastructure/type/Match";
+import { UpdateStatus } from "../../../usecases/match/UpdateStatus";
 
 export const hitHandler = (io: Server, socket: Socket) => {
-  socket.on('hit', ({remoteId, updateHealth}) => {
+  socket.on("hit", async ({ matchId, remoteId, updateHealth }) => {
     const socketId = onlineUsers.get(remoteId);
-    
+
+    if (updateHealth <= 0) {
+      const usecase = new UpdateStatus(new MatchRepository());
+      await usecase.execute({ id: matchId, status: "end" });
+    }
+
     if (socketId) {
       io.to(socketId).emit("got_hit", { updateHealth });
     }
-  })
-}
+  });
+};
 
 export const playerPositionUpdate = (io: Server, socket: Socket) => {
   socket.on("update_position", ({ remoteId, position }) => {

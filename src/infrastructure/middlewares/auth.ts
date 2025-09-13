@@ -1,5 +1,5 @@
-import User from "../../infrastructure/db/models/User.ts";
-import { verifyAccessToken } from "../../lib/util/token.ts";
+import User from "../../infrastructure/db/models/User";
+import { verifyAccessToken } from "../../lib/util/token";
 import { Request, Response, NextFunction } from "express";
 
 // Extend Express Request interface to include 'user'
@@ -37,6 +37,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     req.user = await User.findOne({ _id });
     if (!req.user) {
       res.status(404).json({ error: _id });
+      return;
     }
     next();
   } catch (error) {
