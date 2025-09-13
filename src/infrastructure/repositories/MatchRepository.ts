@@ -1,11 +1,9 @@
-import { Match as M } from "../../domain/entities/Match.ts";
-import Match from "../../infrastructure/db/models/Match.ts";
-import { IMatchRepository } from "../../domain/repositories/IMatchRepository.ts";
-import { MatchPayload } from "../../infrastructure/type/Match.ts";
+import { Match as M } from "../../domain/entities/Match";
+import Match from "../../infrastructure/db/models/Match";
+import { IMatchRepository } from "../../domain/repositories/IMatchRepository";
+import { MatchPayload } from "../../infrastructure/type/Match";
 
 export class MatchRepository implements IMatchRepository {
-
-
   async createRoom(match: MatchPayload): Promise<M | null> {
     const matchDoc = await Match.create({
       slot: [match.slot[0], match.slot[1]],
@@ -19,8 +17,8 @@ export class MatchRepository implements IMatchRepository {
     }));
 
     const status = matchDoc.match_status;
-    const startTime = matchDoc.createdAt;
-    const endTime = matchDoc.endTime;
+    const startTime = matchDoc.createdAt.getTime();
+    const endTime = matchDoc.endTime ?? null;
 
     const matchData = new M(
       matchDoc._id.toString(),
@@ -36,39 +34,35 @@ export class MatchRepository implements IMatchRepository {
   async findMatchById(id: string): Promise<M | null> {
     const matchDoc = await Match.findById(id);
 
-    if (!matchDoc) return null;
+    if (!matchDoc) throw new Error("Match not found");
 
     const slot = matchDoc.slot.map((s: any) => ({
       playerId: s?.playerId ? s.playerId.toString() : "",
     }));
 
     const status = matchDoc.match_status;
-    const startTime = matchDoc.createdAt;
-    const endTime = matchDoc.endTime;
+    const startTime = matchDoc.createdAt.getTime();
+    const endTime = matchDoc.endTime ?? null;
 
     const match = new M(id, slot, status, startTime, endTime);
 
     return match;
   }
 
-  async updatePosition(
-    matchId: string,
-    p1Position: { x: number; y: number },
-    p2Position: { x: number; y: number }
-  ): Promise<M | null> {
-    const updatedMatch = await Match.findByIdAndUpdate(
-      matchId,
-      {
-        $set: {
-          "catStatus.0.position": p1Position,
-          "catStatus.1.position": p2Position,
-        },
-      },
-      { new: true }
-    );
+  async updateStatus(id: string, status: string): Promise<void> {
+    const match = await this.findMatchById(id);
 
-    const match = await this.findMatchById(updatedMatch?._id.toString() ?? "");
+    switch (status) {
+      case "end":
+        match?.end();
+        break;
+      default:
+        throw new Error(`Invaild status: ${status}`);
+    }
 
-    return match;
+    await Match.findByIdAndUpdate(id, {
+      match_status: match?.status,
+      endTime: match?.endTime,
+    });
   }
 }

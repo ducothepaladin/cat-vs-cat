@@ -1,16 +1,21 @@
 {
   "compilerOptions": {
-    "target": "es2022",
-    "module": "node16",
-    "moduleResolution": "node16",
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
     "baseUrl": "./src",
     "outDir": "./dist",
-    "strict": true
+    "strict": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@modules/*": ["modules/*"],
+      "@shared/*": ["shared/*"],
+      "@api/*": ["api/*"],
+      "@config/*": ["config/*"]
+    }
   },
-  "exclude": ["node_modules/"],
-  "include": ["src/**/*.ts", "src/infrastructure/db/seed/seeder.mjs"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

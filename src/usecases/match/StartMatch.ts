@@ -1,26 +1,23 @@
-import { CatStatus } from "../../domain/valueObjects/CatStatus.ts";
-import { MatchRepository } from "../../infrastructure/repositories/MatchRepository.ts";
+import { CatStatus } from "../../domain/valueObjects/CatStatus";
+import { MatchRepository } from "../../infrastructure/repositories/MatchRepository";
 
 export class StartMatch {
-    constructor(private readonly repo:MatchRepository ){}
+  constructor(private readonly repo: MatchRepository) {}
 
+  async execute(input: { p1: string; p2: string }) {
+    const { p1, p2 } = input;
 
-    async execute(input: {p1: string, p2: string}) {
+    const catStatus1 = CatStatus.init(100, 100);
+    const catStatus2 = CatStatus.init(500, 500);
 
-        const {p1, p2} = input;
+    const payload = {
+      slot: [{ playerId: p1 }, { playerId: p2 }],
+      catStatus: [catStatus1, catStatus2],
+      status: "start",
+    };
 
-        const catStatus1 = CatStatus.init(100, 100);
-        const catStatus2 = CatStatus.init(500, 500);
+    const match = await this.repo.createRoom(payload);
 
-        const payload = {
-            slot: [{playerId: p1}, {playerId: p2}],
-            catStatus: [catStatus1, catStatus2],
-            status: "start",
-        }
-
-        const match = await this.repo.createRoom(payload);
-        
-        
-        return { match };
-    }
+    return { match };
+  }
 }

@@ -22,7 +22,7 @@ const matchSchema = new Schema(
       enum: ["pending", "start", "end"],
       default: "pending",
     },
-    endTime: {type: Date}
+    endTime: {type: Number}
   },
   { timestamps: true }
 );

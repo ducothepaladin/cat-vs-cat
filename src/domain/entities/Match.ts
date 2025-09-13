@@ -1,12 +1,10 @@
-import { CatStatus } from "../valueObjects/CatStatus.ts";
-
 export class Match {
   constructor(
     public id: string,
     public slot: { playerId: string }[],
     public status: "start" | "pending" | "end",
-    public startTime: Date,
-    public endTime: NativeDate | null | undefined
+    public startTime: number,  // Timestamp in ms
+    public endTime: number | null
   ) {}
 
   start(): void {
@@ -15,5 +13,6 @@ export class Match {
 
   end(): void {
     this.status = "end";
+    this.endTime = Date.now();
   }
 }

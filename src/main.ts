@@ -1,6 +1,6 @@
-import { CLIENT_URL, DATABASE_URL, SERVER } from "./config/config.ts";
+import { CLIENT_URL, DATABASE_URL, SERVER } from "./config/config";
 import express from "express";
-import connectDb from "./infrastructure/db/db.ts";
+import connectDb from "./infrastructure/db/db";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
@@ -14,26 +14,30 @@ import {
   playerActionHandler,
   playerPositionUpdate,
   startMatchHandler,
-} from "./infrastructure/socket/handlers/matchSocketHandlers.ts";
+} from "./infrastructure/socket/handlers/matchSocketHandlers";
 import {
   alreadyInRoomHandler,
   inviteHandler,
   joinSlotHandler,
-} from "./infrastructure/socket/handlers/userSocketHandlers.ts";
+} from "./infrastructure/socket/handlers/userSocketHandlers";
 
-import matchRouter from "./infrastructure/routes/matchRoutes.ts";
-import userRouter from "./infrastructure/routes/userRoutes.ts";
-import authRouter from "./infrastructure/routes/authRoutes.ts";
+import matchRouter from "./infrastructure/routes/matchRoutes";
+import userRouter from "./infrastructure/routes/userRoutes";
+import authRouter from "./infrastructure/routes/authRoutes";
 import {
   onlineUsers,
   socketAuth,
-} from "./infrastructure/middlewares/socketAuth.ts";
+} from "./infrastructure/middlewares/socketAuth";
 
 const app = express();
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
-  cors: { origin: CLIENT_URL, credentials: true, methods: ["GET", "POST"] },
+  cors: {
+    origin: CLIENT_URL,
+    credentials: true,
+    methods: ["GET", "POST"],
+  },
 });
 
 async function main() {
