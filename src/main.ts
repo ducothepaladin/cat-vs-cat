@@ -34,7 +34,7 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: CLIENT_URL,
+    origin: "https://cat-vs-cat-client.vercel.app",
     credentials: true,
     methods: ["GET", "POST"],
   },
@@ -44,7 +44,9 @@ async function main() {
   //middlewares
   app.use(express.json());
   app.use(cookieParser());
-  app.use(cors({ origin: CLIENT_URL, credentials: true }));
+  app.use(
+    cors({ origin: "https://cat-vs-cat-client.vercel.app", credentials: true })
+  );
   io.use(socketAuth);
 
   //routes
