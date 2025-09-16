@@ -12,9 +12,7 @@ export const SERVER_PORT = process.env.SERVER_PORT
 
 export const DATABASE_URL = process.env.DATABASE_URL ?? "";
 
-export const CLIENT_URL = DEVELOPMENT
-  ? "http://localhost:5173"
-  : process.env.CLIENT_URL;
+export const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
 export const ACCESS_SECRET = process.env.ACCESS_SECRET || "";
 export const REFRESH_SECRET = process.env.REFRESH_SECRET || "";
